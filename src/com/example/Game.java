@@ -9,7 +9,7 @@ public class Game {
 
     public static final int MIN = 1;
     public static final int MAX = 100;
-    public static final int MAX_ATTEMPTS = 7;
+    public static final int MAX_ATTEMPTS = 10;
 
     private final Random random = new Random();
     private final int answer;
