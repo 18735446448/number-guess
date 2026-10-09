@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.console.HangmanConsole;
 import com.example.console.Input;
 import com.example.console.NumberGuessConsole;
 import com.example.console.RockPaperScissorsConsole;
@@ -19,7 +20,7 @@ public class App {
 
         while (true) {
             printMenu();
-            int choice = input.readInt("请选择：", 0, 3);
+            int choice = input.readInt("请选择：", 0, 4);
             if (choice <= 0) {
                 break;
             }
@@ -27,6 +28,7 @@ public class App {
                 case 1 -> new NumberGuessConsole(input).play();
                 case 2 -> new RockPaperScissorsConsole(input).play();
                 case 3 -> new TicTacToeConsole(input).play();
+                case 4 -> new HangmanConsole(input).play();
                 default -> {
                     // readInt 已限定范围，不会走到这里
                 }
@@ -43,6 +45,7 @@ public class App {
                 1. 猜数字
                 2. 石头剪刀布
                 3. 井字棋
+                4. 猜单词
                 0. 退出""");
     }
 }

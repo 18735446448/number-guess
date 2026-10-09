@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * 井字棋（3x3）核心逻辑：玩家执 X，电脑执 O，玩家先手。
+ * 井字棋（3x3）核心逻辑：支持人机对战与双人对战两种模式，玩家 X 先手。
  *
  * <p>棋盘用长度为 9 的一维数组表示，落子位置为 1~9，与界面显示的九宫格顺序一致：
  *
@@ -18,9 +18,17 @@ import java.util.Random;
  *   7 | 8 | 9
  * </pre>
  *
- * <p>电脑采用简单策略：能赢就赢 → 堵住玩家 → 占中心 → 占角 → 其余随机。
+ * <p>人机模式下电脑采用简单策略：能赢就赢 → 堵住玩家 → 占中心 → 占角 → 其余随机。
  */
 public class TicTacToe {
+
+    /** 对战模式 */
+    public enum Mode {
+        /** 玩家对战电脑，电脑自动应手 */
+        VS_COMPUTER,
+        /** 两名玩家轮流手动落子 */
+        TWO_PLAYERS
+    }
 
     public static final char EMPTY = ' ';
     public static final char PLAYER = 'X';
@@ -34,39 +42,59 @@ public class TicTacToe {
 
     private final char[] board = new char[9];
     private final Random random = new Random();
+    private final Mode mode;
+    private char currentPlayer = PLAYER;
     private char winner = EMPTY;
     private boolean finished = false;
+    private int computerLastMove = -1;
 
+    /** 默认人机对战 */
     public TicTacToe() {
+        this(Mode.VS_COMPUTER);
+    }
+
+    public TicTacToe(Mode mode) {
+        this.mode = mode;
         Arrays.fill(board, EMPTY);
     }
 
     /**
-     * 玩家在指定位置落子，随后电脑自动应手。
+     * 在当前玩家的回合于指定位置落子。人机模式下，轮到电脑时会自动应手。
      *
      * @param position 1~9 的落子位置
      * @return true 表示落子成功；false 表示位置非法或已被占用
      */
-    public boolean playerMove(int position) {
+    public boolean move(int position) {
         if (finished || position < 1 || position > 9 || board[position - 1] != EMPTY) {
             return false;
         }
-        board[position - 1] = PLAYER;
+        board[position - 1] = currentPlayer;
         checkResult();
+
         if (!finished) {
-            computerMove();
+            switchTurn();
+            if (mode == Mode.VS_COMPUTER && currentPlayer == COMPUTER) {
+                playComputer();
+            }
         }
         return true;
     }
 
-    private void computerMove() {
+    private void switchTurn() {
+        currentPlayer = currentPlayer == PLAYER ? COMPUTER : PLAYER;
+    }
+
+    private void playComputer() {
         List<Integer> empty = emptyCells();
         if (empty.isEmpty()) {
             return;
         }
-        int choice = pickMove(empty);
-        board[choice] = COMPUTER;
+        computerLastMove = pickMove(empty);
+        board[computerLastMove] = COMPUTER;
         checkResult();
+        if (!finished) {
+            switchTurn();
+        }
     }
 
     private int pickMove(List<Integer> empty) {
@@ -132,6 +160,20 @@ public class TicTacToe {
             }
         }
         return cells;
+    }
+
+    /** 当前该谁落子：PLAYER 或 COMPUTER */
+    public char getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
+    /** 电脑最近一次落子的位置（1~9）；尚未落子时为 0 */
+    public int getComputerLastMove() {
+        return computerLastMove < 0 ? 0 : computerLastMove + 1;
     }
 
     public boolean isFinished() {

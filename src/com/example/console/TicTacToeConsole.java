@@ -1,9 +1,10 @@
 package com.example.console;
 
 import com.example.core.TicTacToe;
+import com.example.core.TicTacToe.Mode;
 
 /**
- * 井字棋的控制台交互层：展示棋盘、读取落子位置，胜负判定由 {@link TicTacToe} 负责。
+ * 井字棋的控制台交互层：支持人机对战与双人对战。
  */
 public class TicTacToeConsole {
 
@@ -14,24 +15,39 @@ public class TicTacToeConsole {
     }
 
     public void play() {
-        TicTacToe game = new TicTacToe();
         System.out.println("\n=== 井字棋 ===");
-        System.out.println("你是 X，电脑是 O，输入 1~9 落子，0 返回菜单");
+        int option = input.readInt("选择模式：1.人机对战  2.双人对战  0.返回菜单：", 0, 2);
+        if (option <= 0) {
+            return;
+        }
+
+        boolean vsComputer = option == 1;
+        TicTacToe game = new TicTacToe(vsComputer ? Mode.VS_COMPUTER : Mode.TWO_PLAYERS);
+        System.out.println(vsComputer ? "你是 X，电脑是 O" : "玩家 X 先手，玩家 O 后手");
 
         while (!game.isFinished()) {
             printBoard(game.getBoard());
-            int position = input.readInt("请落子：", 0, 9);
+            String prompt = vsComputer
+                    ? "请落子："
+                    : String.format("玩家 %c 请落子：", game.getCurrentPlayer());
+            int position = input.readInt(prompt, 0, 9);
             if (position <= 0) {
                 return;
             }
-            if (!game.playerMove(position)) {
+            if (!game.move(position)) {
                 System.out.println("  这个位置不能下，换一个");
+                continue;
+            }
+            if (vsComputer && !game.isFinished() && game.getComputerLastMove() > 0) {
+                System.out.printf("  电脑下在了 %d 号位%n", game.getComputerLastMove());
             }
         }
 
         printBoard(game.getBoard());
         if (game.isDraw()) {
             System.out.println("平局！");
+        } else if (!vsComputer) {
+            System.out.printf("玩家 %c 获胜！%n", game.getWinner());
         } else if (game.getWinner() == TicTacToe.PLAYER) {
             System.out.println("你赢了！");
         } else {
