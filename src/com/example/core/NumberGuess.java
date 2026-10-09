@@ -1,11 +1,13 @@
-package com.example;
+package com.example.core;
 
 import java.util.Random;
 
 /**
  * 猜数字游戏的核心逻辑：在 [MIN, MAX] 区间内随机生成一个答案，玩家在限定次数内猜测。
+ *
+ * <p>本类不依赖任何输入输出设施，只负责规则与状态，可被控制台、GUI 或 Web 界面复用。
  */
-public class Game {
+public class NumberGuess {
 
     public static final int MIN = 1;
     public static final int MAX = 100;
@@ -15,7 +17,7 @@ public class Game {
     private final int answer;
     private int attempts = 0;
 
-    public Game() {
+    public NumberGuess() {
         this.answer = random.nextInt(MAX - MIN + 1) + MIN;
     }
 

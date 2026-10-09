@@ -1,47 +1,48 @@
 package com.example;
 
+import com.example.console.Input;
+import com.example.console.NumberGuessConsole;
+import com.example.console.RockPaperScissorsConsole;
+import com.example.console.TicTacToeConsole;
 import java.util.Scanner;
 
 /**
- * 程序入口：控制台交互的猜数字小游戏。
+ * 程序入口：展示游戏菜单，根据用户选择进入对应的小游戏。
  */
 public class App {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Game game = new Game();
+        Input input = new Input(scanner);
 
-        System.out.println("=== 猜数字游戏 ===");
-        System.out.printf("我在 %d ~ %d 之间想了一个数，你有 %d 次机会，开始吧！%n",
-                Game.MIN, Game.MAX, Game.MAX_ATTEMPTS);
+        System.out.println("========== Java 小游戏合集 ==========");
 
         while (true) {
-            System.out.printf("第 %d 次尝试（还剩 %d 次），请输入：",
-                    game.getAttempts() + 1, game.remainingAttempts());
-
-            int input;
-            try {
-                input = Integer.parseInt(scanner.nextLine().trim());
-            } catch (NumberFormatException e) {
-                System.out.println("  × 请输入有效数字");
-                continue;
-            }
-
-            String result = game.guess(input);
-            System.out.println("  → " + result);
-
-            if (game.isWin(input)) {
-                System.out.printf("恭喜！你用了 %d 次猜中答案 %d。%n",
-                        game.getAttempts(), game.getAnswer());
+            printMenu();
+            int choice = input.readInt("请选择：", 0, 3);
+            if (choice <= 0) {
                 break;
             }
-
-            if (game.isOutOfAttempts()) {
-                System.out.printf("机会用完了，正确答案是 %d。再来一局？%n", game.getAnswer());
-                break;
+            switch (choice) {
+                case 1 -> new NumberGuessConsole(input).play();
+                case 2 -> new RockPaperScissorsConsole(input).play();
+                case 3 -> new TicTacToeConsole(input).play();
+                default -> {
+                    // readInt 已限定范围，不会走到这里
+                }
             }
         }
 
+        System.out.println("再见！");
         scanner.close();
+    }
+
+    private static void printMenu() {
+        System.out.println("""
+                
+                1. 猜数字
+                2. 石头剪刀布
+                3. 井字棋
+                0. 退出""");
     }
 }
